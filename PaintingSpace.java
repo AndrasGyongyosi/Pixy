@@ -31,7 +31,7 @@ public class PaintingSpace {
 		 */
 		for (int i=0; i < FieldCountX ; i++){
 			for (int j=0 ; j<FieldCountY; j++){
-				fields.add(new Field(i,j,FirstColor));
+				fields.add(new Field(i,j,SecondColor));
 			}
 		}
 	}
@@ -56,14 +56,36 @@ public class PaintingSpace {
 	public static int getCountY(){
 		return FieldCountY;
 	}
+	public static Color getFieldColor(int i, int j){
+		return fields.get(i*FieldCountX + j).getColor();
+	}
 	public static void Change1Color(Color c){
 		FirstColor = c;
 	}
 	public static void Change2Color(Color c){
 		SecondColor = c;
 	}
+	public static void ChangeFColor(Color c){
+		FrameColor = c;
+	}
+	public static boolean getModified(int i, int j){
+		return fields.get(i * FieldCountX + j).getModified();
+	}
+	public static void setModified(int i, int j, boolean b){
+		fields.get(i * FieldCountX + j).setModified(b);
+	}
 	public static void DrawField(int i, int j, int Buttonid){
-		if (Buttonid == 1)	fields.get(i*FieldCountX+j).Drawing(FirstColor);
-		if (Buttonid == 3) fields.get(i*FieldCountX+j).Drawing(SecondColor);
+		if (Buttonid == 1){
+			/*Field newfield = new Field(i,j,FirstColor);
+			fields.remove(i * FieldCountX + j);
+			fields.add(i* FieldCountX + j, newfield);*/
+			fields.get(i * FieldCountX + j).Drawing(FirstColor);
+		}
+		if (Buttonid == 3){
+			/*Field newfield = new Field(i,j,SecondColor);
+			fields.remove(i * FieldCountX + j);
+			fields.add(i* FieldCountX + j, newfield);*/
+			fields.get(i * FieldCountX + j).Drawing(SecondColor);
+		}
 	}
 }

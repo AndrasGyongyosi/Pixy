@@ -25,6 +25,10 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.JComboBox;
+import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
+import java.awt.List;
 
 public class drawing {
 
@@ -73,6 +77,16 @@ public class drawing {
 				g.setColor(Color.RED);
 			g.fillRect(40, 30 * i + 13, 10, 10);
 		}
+	}
+	public void AreaFills (Graphics g, Color FieldColor, Color NewColor, int i, int j){
+			g.setColor(NewColor);
+			g.fillRect(i*PaintingSpace.getSizeX()+6, j*PaintingSpace.getSizeY()+6, 29, 29);
+			PaintingSpace.DrawField(i, j, 1);
+			PaintingSpace.setModified(i, j, true);
+			if (i<PaintingSpace.getCountX()-1 && !PaintingSpace.getModified(i+1, j) && PaintingSpace.getFieldColor(i+1, j).equals(FieldColor)) AreaFills(g, FieldColor, NewColor, i+1, j);
+			if (j<PaintingSpace.getCountY()-1 && !PaintingSpace.getModified(i, j+1) &&PaintingSpace.getFieldColor(i, j+1).equals(FieldColor))AreaFills(g, FieldColor, NewColor, i, j+1);
+			if (i>0 && !PaintingSpace.getModified(i-1, j) &&PaintingSpace.getFieldColor(i-1, j).equals(FieldColor))AreaFills(g, FieldColor, NewColor, i-1, j);
+			if (j>0 && !PaintingSpace.getModified(i, j-1) &&PaintingSpace.getFieldColor(i, j-1).equals(FieldColor))AreaFills(g, FieldColor, NewColor, i, j-1);
 	}
 
 	private void initialize() {
@@ -195,32 +209,43 @@ public class drawing {
 			public void mouseReleased(MouseEvent mouse) {
 				int FieldX = (mouse.getX() - 5 - (mouse.getX() - 5) % 30) / 30;
 				int FieldY = (mouse.getY() - 5 - (mouse.getY() - 5) % 30) / 30;
-				PaintingSpace.DrawField(FieldX, FieldY, mouse.getButton());
 				/* Beállítjuk, hogy tároljuk a mezõ színét. */
 				Graphics g = canvas.getGraphics();
 				if (mouse.getButton() == 1)
 					g.setColor(PaintingSpace.getFirstColor());
 				if (mouse.getButton() == 3)
 					g.setColor(PaintingSpace.getSecondColor());
-				if (mouse.getButton() == 2) {
-					for (int i = 0; i < PaintingSpace.getCountX(); i++) {
-						for (int j = 0; j < PaintingSpace.getCountY(); j++) {
-							PaintingSpace.DrawField(i, j, 3);
-							g.setColor(PaintingSpace.getSecondColor());
-							g.fillRect(30 * i + 6, 30 * j + 6, 29, 29);
-						}
+				/*if (mouse.getButton() == 2) {
+					g.setColor(PaintingSpace.getSecondColor());
+					PaintingSpace.ChangeFColor(PaintingSpace.getSecondColor());
+						for (int i=0 ; i<=PaintingSpace.getCountX(); i++)
+							g.drawLine(i*PaintingSpace.getSizeX()+5, 5, i*PaintingSpace.getSizeX()+5, PaintingSpace.getCountY()*PaintingSpace.getSizeY()+5);
+					//	vízszintes rácsok
+					for (int j=0 ; j<=PaintingSpace.getCountY();j++)
+							g.drawLine(5, j*PaintingSpace.getSizeY()+5, PaintingSpace.getCountX()*PaintingSpace.getSizeX()+5, j*PaintingSpace.getSizeY()+5);
+					//	függõleges rácsok
+				}
+				else{*/
+				if (mouse.getButton()==2){
+					AreaFills(g, PaintingSpace.getFieldColor(FieldX, FieldY), PaintingSpace.getFirstColor(), FieldX, FieldY);
+					for (int i=0;i<PaintingSpace.getCountX();i++)
+						for (int j=0; j<PaintingSpace.getCountY();j++)
+							PaintingSpace.setModified(i, j, false);
+				} else {
+				for (int i = Math.min(pressedX,FieldX); i <= Math.max(pressedX,FieldX); i++)
+					for (int j = Math.min(pressedY,FieldY); j <= Math.max(pressedY,FieldY); j++){
+						g.fillRect(i * 30 + 6, j * 30 + 6, PaintingSpace.getSizeX() - 1, PaintingSpace.getSizeY() - 1);
+						PaintingSpace.DrawField(i, j, mouse.getButton());
 					}
 				}
-				for (int i = Math.min(pressedX,FieldX); i <= Math.max(pressedX,FieldX); i++)
-					for (int j = Math.min(pressedY,FieldY); j <= Math.max(pressedY,FieldY); j++)
-						g.fillRect(i * 30 + 6, j * 30 + 6, PaintingSpace.getSizeX() - 1, PaintingSpace.getSizeY() - 1);
 			}
 
 			@Override
-			public void mousePressed(MouseEvent e) {
-				pressedX = (e.getX() - 5 - (e.getX() - 5) % 30) / 30;
-				pressedY = (e.getY() - 5 - (e.getY() - 5) % 30) / 30;
-			}
+			public void mousePressed(MouseEvent mouse) {
+				Graphics g = canvas.getGraphics();
+				pressedX = (mouse.getX() - 5 - (mouse.getX() - 5) % 30) / 30;
+				pressedY = (mouse.getY() - 5 - (mouse.getY() - 5) % 30) / 30;
+				}
 		});
 		canvas.setBounds(20, 20, PaintingSpace.getCountX() * PaintingSpace.getSizeX() + 10,
 				PaintingSpace.getCountY() * PaintingSpace.getSizeY() + 10);
@@ -334,17 +359,17 @@ public class drawing {
 		menuBar.setBounds(0, 0, frame.getWidth(), 21);
 		frame.getContentPane().add(menuBar);
 
-		JMenu mnGame = new JMenu("Game");
+		JMenu mnGame = new JMenu("Frame");
 		menuBar.add(mnGame);
-
-		JMenuItem mntmSize = new JMenuItem("Size");
-		mnGame.add(mntmSize);
-
-		JCheckBoxMenuItem chckbxmntmSize = new JCheckBoxMenuItem("Size");
-		mnGame.add(chckbxmntmSize);
-
-		JMenuItem mntmAsdasa = new JMenuItem("asdasa");
-		mnGame.add(mntmAsdasa);
+		
+		JRadioButtonMenuItem rdbtnmntmBlue = new JRadioButtonMenuItem("Blue");
+		mnGame.add(rdbtnmntmBlue);
+		
+		JRadioButtonMenuItem rdbtnmntmBlack = new JRadioButtonMenuItem("Black");
+		mnGame.add(rdbtnmntmBlack);
+		
+		JRadioButtonMenuItem rdbtnmntmGreen = new JRadioButtonMenuItem("Green");
+		mnGame.add(rdbtnmntmGreen);
 	}
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
