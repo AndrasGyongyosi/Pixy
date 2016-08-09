@@ -12,8 +12,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.DataBufferInt;
+import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class drawing{
 	public void AreaFills (Graphics g, Color FieldColor, Color NewColor, int i, int j){
 			g.setColor(NewColor);
 			g.fillRect(i*PaintingSpace.getSizeX()+6, j*PaintingSpace.getSizeY()+6, 29, 29);
-			PaintingSpace.DrawField(i, j, 1);
+			PaintingSpace.DrawField(i, j, PaintingSpace.getFirstColor());
 			PaintingSpace.setModified(i, j, true);
 			if (i<PaintingSpace.getCountX()-1 && !PaintingSpace.getModified(i+1, j) && PaintingSpace.getFieldColor(i+1, j).equals(FieldColor)) AreaFills(g, FieldColor, NewColor, i+1, j);
 			if (j<PaintingSpace.getCountY()-1 && !PaintingSpace.getModified(i, j+1) &&PaintingSpace.getFieldColor(i, j+1).equals(FieldColor))AreaFills(g, FieldColor, NewColor, i, j+1);
@@ -237,7 +238,8 @@ public class drawing{
 				for (int i = Math.min(pressedX,FieldX); i <= Math.max(pressedX,FieldX); i++)
 					for (int j = Math.min(pressedY,FieldY); j <= Math.max(pressedY,FieldY); j++){
 						g.fillRect(i * 30 + 6, j * 30 + 6, PaintingSpace.getSizeX() - 1, PaintingSpace.getSizeY() - 1);
-						PaintingSpace.DrawField(i, j, mouse.getButton());
+						if (mouse.getButton()==1) PaintingSpace.DrawField(i, j, PaintingSpace.getFirstColor());
+						if (mouse.getButton()==3) PaintingSpace.DrawField(i, j, PaintingSpace.getSecondColor());
 					}
 				}
 			}
@@ -326,8 +328,7 @@ public class drawing{
 						red = rand.nextInt(256);
 						green = rand.nextInt(256);
 						blue = rand.nextInt(256);
-						PaintingSpace.Change1Color(new Color(red, green, blue));
-						PaintingSpace.DrawField(i, j, 1);
+						PaintingSpace.DrawField(i, j, new Color(red, green, blue));
 						/* Beállítjuk, hogy tároljuk a mezõ színét. */
 						Graphics g = canvas.getGraphics();
 						g.setColor(PaintingSpace.getFirstColor());
@@ -396,6 +397,34 @@ public class drawing{
 		});
 		btnSacepicture.setBounds(14, 190, 110, 23);
 		addColor.add(btnSacepicture);
+		
+		JButton btnLoad = new JButton("LoadPic");
+		btnLoad.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+		            BufferedImage bi = ImageIO.read(new File("in.jpg"));
+		            int w = bi.getWidth(null);
+		            int h = bi.getHeight(null);
+		            Raster r = bi.getData();
+		            int[] col = new int[4];
+		            Color rgb;
+		            //Típus-ra figyerlni kell (int/int)=int?
+		            for (int i=0;i<w;i+=w/PaintingSpace.getCountX()){
+		            	for (int j=0;j<h;j+=h/PaintingSpace.getCountY()){
+		            		r.getPixel(i, j, col);
+		            		rgb=new Color(col[0],col[1],col[2]);
+		            		for(int x=0; int x>)
+		            		PaintingSpace.DrawField(i, j, rgb);
+		            	}
+		            }
+		        } catch (IOException e) {
+		            System.out.println("Image could not be read");
+		            System.exit(1);
+		        }
+			}
+		});
+		btnLoad.setBounds(205, 188, 89, 23);
+		addColor.add(btnLoad);
 
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBounds(0, 0, frame.getWidth(), 21);
