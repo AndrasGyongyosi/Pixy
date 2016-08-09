@@ -10,27 +10,29 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBufferInt;
+import java.awt.image.WritableRaster;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.JComboBox;
-import javax.swing.JRadioButton;
-import javax.swing.JRadioButtonMenuItem;
-import java.awt.List;
 
-public class drawing {
+public class drawing{
 
 	private JFrame frame;
 	public static ArrayList<Color> ColorPalette = new ArrayList<Color>();
@@ -112,7 +114,7 @@ public class drawing {
 		JPanel palette = new Palette();
 
 		JPanel addColor = new JPanel();
-		addColor.setBounds(1221, 60, 304, 188);
+		addColor.setBounds(1221, 60, 304, 232);
 		frame.getContentPane().add(addColor);
 		addColor.setLayout(null);
 
@@ -354,6 +356,46 @@ public class drawing {
 		});
 		btnAdd.setBounds(134, 154, 60, 23);
 		addColor.add(btnAdd);
+		
+		JButton btnSacepicture = new JButton("SavePicture");
+		btnSacepicture.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				 ColorModel cm = ColorModel.getRGBdefault();
+				    int w = PaintingSpace.getCountX()*PaintingSpace.getSizeX();
+				    int h = PaintingSpace.getCountY()*PaintingSpace.getSizeY();
+				    WritableRaster raster = cm.createCompatibleWritableRaster(w, h);
+				    int[] col = new int[4];
+				    int[] fcol = new int[4];
+				    fcol[0]=PaintingSpace.getFrameColor().getRed();
+		    		fcol[1]=PaintingSpace.getFrameColor().getGreen();
+		    		fcol[2]=PaintingSpace.getFrameColor().getBlue();
+				    fcol[3]=255;
+		    		col[3]=255;
+				    try{
+				    for (int i=0; i<PaintingSpace.getCountX();i++){
+				    	for (int j=0; j<PaintingSpace.getCountY();j++){
+				    		col[0]=PaintingSpace.getFieldColor(i, j).getRed();
+				    		col[1]=PaintingSpace.getFieldColor(i, j).getGreen();
+				    		col[2]=PaintingSpace.getFieldColor(i, j).getBlue();
+				    		for (int x=0;x<PaintingSpace.getSizeX();x++){
+				    			for (int y=0;y<PaintingSpace.getSizeY();y++){
+				    				if (x==PaintingSpace.getSizeX()-1 || y==PaintingSpace.getSizeY()-1) raster.setPixel(i*PaintingSpace.getSizeX()+x, j*PaintingSpace.getSizeY()+y, fcol);
+				    				else raster.setPixel(i*PaintingSpace.getSizeX()+x, j*PaintingSpace.getSizeY()+y, col);
+				    	}
+				    		}
+				    	}
+				    }
+				    BufferedImage image = new BufferedImage(cm, raster, false, null);
+				    FileOutputStream fos = new FileOutputStream("F:\\Eclipse workspace\\drawing\\dimage.jpg");
+				    ImageIO.write(image, "PNG", fos);
+				    fos.close();
+				    } catch (Exception ex){
+				    	ex.printStackTrace();
+				    }
+			}
+		});
+		btnSacepicture.setBounds(14, 190, 110, 23);
+		addColor.add(btnSacepicture);
 
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBounds(0, 0, frame.getWidth(), 21);
