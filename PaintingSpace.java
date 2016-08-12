@@ -56,8 +56,33 @@ public class PaintingSpace {
 	public static int getCountY(){
 		return FieldCountY;
 	}
+	public static void setSizeX(int i){
+		FieldSizeX=i;
+	}
+	public static void setSizeY(int i){
+		FieldSizeY=i;
+	}
+	public static void setCountX(int k){
+		FieldCountX=k;
+		fields.clear();
+		for (int i=0; i < FieldCountX ; i++){
+			for (int j=0 ; j<FieldCountY; j++){
+				fields.add(new Field(i,j,FrameColor));
+			}
+		}
+	}
+	public static void setCountY(int k){
+		FieldCountY=k;
+		fields.clear();
+		System.out.println(fields.size());
+		for (int i=0; i < FieldCountX ; i++){
+			for (int j=0 ; j<FieldCountY; j++){
+				fields.add(new Field(i,j,FrameColor));
+			}
+		}
+	}
 	public static Color getFieldColor(int i, int j){
-		return fields.get(i*FieldCountX + j).getColor();
+		return fields.get(i*FieldCountY + j).getColor();
 	}
 	public static void Change1Color(Color c){
 		FirstColor = c;
@@ -69,23 +94,12 @@ public class PaintingSpace {
 		FrameColor = c;
 	}
 	public static boolean getModified(int i, int j){
-		return fields.get(i * FieldCountX + j).getModified();
+		return fields.get(i * FieldCountY + j).getModified();
 	}
 	public static void setModified(int i, int j, boolean b){
-		fields.get(i * FieldCountX + j).setModified(b);
+		fields.get(i * FieldCountY + j).setModified(b);
 	}
-	public static void DrawField(int i, int j, int Buttonid){
-		if (Buttonid == 1){
-			/*Field newfield = new Field(i,j,FirstColor);
-			fields.remove(i * FieldCountX + j);
-			fields.add(i* FieldCountX + j, newfield);*/
-			fields.get(i * FieldCountX + j).Drawing(FirstColor);
-		}
-		if (Buttonid == 3){
-			/*Field newfield = new Field(i,j,SecondColor);
-			fields.remove(i * FieldCountX + j);
-			fields.add(i* FieldCountX + j, newfield);*/
-			fields.get(i * FieldCountX + j).Drawing(SecondColor);
-		}
+	public static void DrawField(int i, int j, Color col){
+			fields.get(i * FieldCountY + j).Drawing(col);
 	}
 }

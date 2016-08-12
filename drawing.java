@@ -210,8 +210,8 @@ public class drawing{
 		canvas.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent mouse) {
-				int FieldX = (mouse.getX() - 5 - (mouse.getX() - 5) % 30) / 30;
-				int FieldY = (mouse.getY() - 5 - (mouse.getY() - 5) % 30) / 30;
+				int FieldX = (mouse.getX() - 5 - (mouse.getX() - 5) % PaintingSpace.getSizeX()) / PaintingSpace.getSizeX();
+				int FieldY = (mouse.getY() - 5 - (mouse.getY() - 5) % PaintingSpace.getSizeY()) / PaintingSpace.getSizeY();
 				/* Beállítjuk, hogy tároljuk a mezõ színét. */
 				Graphics g = canvas.getGraphics();
 				if (mouse.getButton() == 1)
@@ -237,7 +237,7 @@ public class drawing{
 				} else {
 				for (int i = Math.min(pressedX,FieldX); i <= Math.max(pressedX,FieldX); i++)
 					for (int j = Math.min(pressedY,FieldY); j <= Math.max(pressedY,FieldY); j++){
-						g.fillRect(i * 30 + 6, j * 30 + 6, PaintingSpace.getSizeX() - 1, PaintingSpace.getSizeY() - 1);
+						g.fillRect(i * PaintingSpace.getSizeX() + 6, j * PaintingSpace.getSizeY() + 6, PaintingSpace.getSizeX() - 1, PaintingSpace.getSizeY() - 1);
 						if (mouse.getButton()==1) PaintingSpace.DrawField(i, j, PaintingSpace.getFirstColor());
 						if (mouse.getButton()==3) PaintingSpace.DrawField(i, j, PaintingSpace.getSecondColor());
 					}
@@ -246,9 +246,8 @@ public class drawing{
 
 			@Override
 			public void mousePressed(MouseEvent mouse) {
-				Graphics g = canvas.getGraphics();
-				pressedX = (mouse.getX() - 5 - (mouse.getX() - 5) % 30) / 30;
-				pressedY = (mouse.getY() - 5 - (mouse.getY() - 5) % 30) / 30;
+				pressedX = (mouse.getX() - 5 - (mouse.getX() - 5) % PaintingSpace.getSizeX()) / PaintingSpace.getSizeX();
+				pressedY = (mouse.getY() - 5 - (mouse.getY() - 5) % PaintingSpace.getSizeY()) / PaintingSpace.getSizeY();
 				}
 		});
 		canvas.setBounds(20, 20, PaintingSpace.getCountX() * PaintingSpace.getSizeX() + 10,
@@ -323,16 +322,17 @@ public class drawing{
 				Color OriginalColor = PaintingSpace.getFirstColor();
 				Random rand = new Random();
 				int red, green, blue;
+				Graphics g = canvas.getGraphics();
 				for (int i = 0; i < PaintingSpace.getCountX(); i++) {
 					for (int j = 0; j < PaintingSpace.getCountY(); j++) {
 						red = rand.nextInt(256);
 						green = rand.nextInt(256);
 						blue = rand.nextInt(256);
 						PaintingSpace.DrawField(i, j, new Color(red, green, blue));
+						PaintingSpace.Change1Color(new Color(red,green,blue));
 						/* Beállítjuk, hogy tároljuk a mezõ színét. */
-						Graphics g = canvas.getGraphics();
 						g.setColor(PaintingSpace.getFirstColor());
-						g.fillRect(i * 30 + 6, j * 30 + 6, PaintingSpace.getSizeX() - 1, PaintingSpace.getSizeY() - 1);
+						g.fillRect(i * PaintingSpace.getSizeX() + 6, j * PaintingSpace.getSizeY() + 6, PaintingSpace.getSizeX() - 1, PaintingSpace.getSizeY() - 1);
 					}
 				}
 				PaintingSpace.Change1Color(OriginalColor);
@@ -402,21 +402,24 @@ public class drawing{
 		btnLoad.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-		            BufferedImage bi = ImageIO.read(new File("in.jpg"));
+		            BufferedImage bi = ImageIO.read(new File("input.jpg"));
 		            int w = bi.getWidth(null);
 		            int h = bi.getHeight(null);
+		            int newCountX=w*PaintingSpace.getCountX()/h;
+		            int newSizeX=PaintingSpace.getCountX()*PaintingSpace.getSizeX()/newCountX;
+		            PaintingSpace.setCountX(newCountX);
+		            PaintingSpace.setSizeX(newSizeX);
 		            Raster r = bi.getData();
 		            int[] col = new int[4];
 		            Color rgb;
-		            //Típus-ra figyerlni kell (int/int)=int?
-		            for (int i=0;i<w;i+=w/PaintingSpace.getCountX()){
-		            	for (int j=0;j<h;j+=h/PaintingSpace.getCountY()){
-		            		r.getPixel(i, j, col);
+		            for (int i=0;i<PaintingSpace.getCountX();i++){
+		            	for (int j=0;j<PaintingSpace.getCountY();j++){
+		            		col = r.getPixel(i*w/PaintingSpace.getCountX(), j*h/PaintingSpace.getCountY(), col);
 		            		rgb=new Color(col[0],col[1],col[2]);
-		            		for(int x=0; int x>)
 		            		PaintingSpace.DrawField(i, j, rgb);
 		            	}
 		            }
+		            DrawImage(canvas.getGraphics());
 		        } catch (IOException e) {
 		            System.out.println("Image could not be read");
 		            System.exit(1);
@@ -442,7 +445,26 @@ public class drawing{
 		JRadioButtonMenuItem rdbtnmntmGreen = new JRadioButtonMenuItem("Green");
 		mnGame.add(rdbtnmntmGreen);
 	}
-
+	private void DrawImage(Graphics g){
+		g.setColor(Color.BLACK);
+		g.fillRect(0, 0, PaintingSpace.getCountX()*PaintingSpace.getSizeX()+10, PaintingSpace.getCountY()*PaintingSpace.getSizeY()+10);
+		for (int i=0; i<PaintingSpace.getCountX(); i++){
+			for (int j=0; j<PaintingSpace.getCountY(); j++){
+				g.setColor(PaintingSpace.getFieldColor(i, j));
+				g.fillRect(i * PaintingSpace.getSizeX() + 6, j * PaintingSpace.getSizeY() + 6, PaintingSpace.getSizeX() - 1, PaintingSpace.getSizeY() - 1);
+			}
+		}
+		// mezõk
+		g.setColor(PaintingSpace.getFrameColor());
+		for (int i=0 ; i<=PaintingSpace.getCountX(); i++)
+				g.drawLine(i*PaintingSpace.getSizeX()+5, 5, i*PaintingSpace.getSizeX()+5, PaintingSpace.getCountY()*PaintingSpace.getSizeY()+5);
+		//	vízszintes rácsok
+		for (int j=0 ; j<=PaintingSpace.getCountY();j++)
+				g.drawLine(5, j*PaintingSpace.getSizeY()+5, PaintingSpace.getCountX()*PaintingSpace.getSizeX()+5, j*PaintingSpace.getSizeY()+5);
+		//	függõleges rácsok	
+		g.setColor(Color.BLACK);
+		g.fillRect(PaintingSpace.getCountX()*PaintingSpace.getSizeX()+6, 0, PaintingSpace.getSizeX(), PaintingSpace.getCountY() * PaintingSpace.getSizeY() + 10);
+	}
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
