@@ -26,12 +26,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.FileChooserUI;
 
 public class drawing{
 
@@ -387,7 +389,8 @@ public class drawing{
 				    	}
 				    }
 				    BufferedImage image = new BufferedImage(cm, raster, false, null);
-				    FileOutputStream fos = new FileOutputStream("F:\\Eclipse workspace\\drawing\\dimage.jpg");
+				    File output = new File("output.jpg");
+				    FileOutputStream fos = new FileOutputStream(output.getAbsolutePath());
 				    ImageIO.write(image, "PNG", fos);
 				    fos.close();
 				    } catch (Exception ex){
@@ -421,8 +424,8 @@ public class drawing{
 		            }
 		            DrawImage(canvas.getGraphics());
 		        } catch (IOException e) {
+		        	JOptionPane.showMessageDialog(canvas, "You need to paste the file in the root folder and name by input.jpg");
 		            System.out.println("Image could not be read");
-		            System.exit(1);
 		        }
 			}
 		});
