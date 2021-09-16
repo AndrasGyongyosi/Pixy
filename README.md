@@ -1,4 +1,4 @@
-# PIXY
+# Pixy
 It's a simple drawing program which I developed as a hobby project, after I learned Java in Uni. It uses Java Swing and support features like auto-filling, color mixing, random color generation and many others.
 
 ## Installation
